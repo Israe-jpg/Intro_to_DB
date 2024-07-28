@@ -1,40 +1,30 @@
-CREATE DATABASE alx_book_store;
+import mysql.connector
+from mysql.connector import errorcode
 
-USE alx_book_store;
+try:
+    # Establish connection to MySQL server
+    cnx = mysql.connector.connect(
+        host="your_host",
+        user="your_username",
+        password="your_password"
+    )
+    cursor = cnx.cursor()
 
-CREATE TABLE Authors (
-    author_id INT AUTO_INCREMENT PRIMARY KEY,
-    author_name VARCHAR(215) NOT NULL
-);
+    # Create the database
+    cursor.execute("CREATE DATABASE IF NOT EXISTS alx_book_store")
+    print("Database 'alx_book_store' created successfully!")
 
-CREATE TABLE Books (
-    book_id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(130) NOT NULL,
-    author_id INT,
-    price DOUBLE NOT NULL,
-    publication_date DATE,
-    FOREIGN KEY (author_id) REFERENCES Authors(author_id)
-);
+except mysql.connector.Error as err:
+    if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+        print("Error: Invalid username or password")
+    elif err.errno == errorcode.ER_BAD_DB_ERROR:
+        print("Error: Database does not exist")
+    else:
+        print(err)
 
-CREATE TABLE Customers (
-    customer_id INT AUTO_INCREMENT PRIMARY KEY,
-    customer_name VARCHAR(215) NOT NULL,
-    email VARCHAR(215) NOT NULL,
-    address TEXT
-);
-
-CREATE TABLE Orders (
-    order_id INT AUTO_INCREMENT PRIMARY KEY,
-    customer_id INT,
-    order_date DATE,
-    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id)
-);
-
-CREATE TABLE Order_Details (
-    orderdetailid INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT,
-    book_id INT,
-    quantity DOUBLE NOT NULL,
-    FOREIGN KEY (order_id) REFERENCES Orders(order_id),
-    FOREIGN KEY (book_id) REFERENCES Books(book_id)
-);
+finally:
+    # Close the cursor and connection
+    if 'cursor' in locals() and cursor:
+        cursor.close()
+    if 'cnx' in locals() and cnx:
+        cnx.close()
